@@ -130,7 +130,7 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: IMAGE_TAG_RESULT_SERVER
+      app: resultserver
   template:
     metadata:
       labels:
@@ -138,7 +138,7 @@ spec:
     spec:
       containers:
       - name: resultserver
-        image: 
+        image: IMAGE_TAG_RESULT_SERVER
         ports:
         - containerPort: 80
         envFrom:
@@ -174,7 +174,7 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: webserver  
+      app: webserver
   template:
     metadata:
       labels:
@@ -207,4 +207,3 @@ spec:
      targetPort: 80
      nodePort: 30001
      protocol: TCP
----
