@@ -1,0 +1,210 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-deployment
+  labels:
+    app: mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - image: mysql:5.7
+        name: mysql
+        ports:
+        - containerPort: 3306
+        envFrom:
+          - configMapRef:
+              name: phonebook-configmap
+          - secretRef:
+              name: phonebook-secret
+        volumeMounts:
+          - name: mysql-storage
+            mountPath: /var/lib/mysql
+      volumes:
+        - name: mysql-storage
+          persistentVolumeClaim:
+            claimName: mysql-pv-claim
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-pv
+  labels:
+    app: mysql
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/home/data"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pv-claim
+  labels:
+    app: mysql
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-svc
+  labels:
+    app: mysql
+spec:
+  selector:
+      app: mysql
+  type: ClusterIP
+  ports:
+    - name: db
+      port: 3306
+      targetPort: 3306
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: phonebook-configmap
+data:
+  MYSQL_DATABASE: baby_phonebook
+  MYSQL_USER: admin
+  MYSQL_DATABASE_HOST: mysql-svc
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: phonebook-ingress-2
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: webserver-svc
+                port: 
+                  number: 80
+          - path: /result
+            pathType: Prefix
+            backend:
+              service: 
+                name: resultserver-svc
+                port: 
+                  number: 80
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: phonebook-secret
+type: Opaque
+data:
+  MYSQL_ROOT_PASSWORD: YmFieV8xMjM0NTY3ODkq
+  MYSQL_PASSWORD: YmFieV8xMjM0NTY3ODkq
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resultserver-deployment
+  labels:
+    app: resultserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: IMAGE_TAG_RESULT_SERVER
+  template:
+    metadata:
+      labels:
+        app: resultserver
+    spec:
+      containers:
+      - name: resultserver
+        image: 
+        ports:
+        - containerPort: 80
+        envFrom:
+        - configMapRef:
+            name: phonebook-configmap
+        - secretRef:
+            name: phonebook-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: resultserver-svc
+  labels:
+    app: resultserver
+spec:
+  selector:
+    app: resultserver
+  type: NodePort
+  ports:
+   - name: http
+     port: 80
+     targetPort: 80
+     nodePort: 30002
+     protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webserver-deployment
+  labels:
+    app: webserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webserver  
+  template:
+    metadata:
+      labels:
+        app: webserver
+    spec:
+      containers:
+      - name: webserver
+        image: IMAGE_TAG_WEB_SERVER
+        ports:
+          - containerPort: 80
+        envFrom:
+        - configMapRef:
+            name: phonebook-configmap
+        - secretRef:
+            name: phonebook-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webserver-svc
+  labels:
+    app: webserver
+spec:
+  selector:
+    app: webserver
+  type: NodePort
+  ports:
+   - name: http
+     port: 80
+     targetPort: 80
+     nodePort: 30001
+     protocol: TCP
+---
