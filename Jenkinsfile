@@ -71,8 +71,8 @@ pipeline {
         steps{
           // Deploy öncesi image tag güncelleme
           sh '''
-            sed -i "s|IMAGE_TAG_WEB_SERVER|${ARTIFACT_REGISTRY}/${APP_REPO_NAME}:web-b${BUILD_NUMBER}|" k8s/manifest.yaml
-            sed -i "s|IMAGE_TAG_RESULT_SERVER|${ARTIFACT_REGISTRY}/${APP_REPO_NAME}:result-b${BUILD_NUMBER}|" k8s/manifest.yaml
+            sed -i "s|IMAGE_TAG_WEB_SERVER|${ARTIFACT_REGISTRY}/${APP_REPO_NAME}:web-b${BUILD_NUMBER}|" k8s/manifest.yml
+            sed -i "s|IMAGE_TAG_RESULT_SERVER|${ARTIFACT_REGISTRY}/${APP_REPO_NAME}:result-b${BUILD_NUMBER}|" k8s/manifest.yml
           '''
           step([
           $class: 'KubernetesEngineBuilder',
