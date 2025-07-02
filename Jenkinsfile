@@ -79,7 +79,7 @@ pipeline {
           projectId: env.PROJECT_ID,
           clusterName: env.CLUSTER_NAME,
           location: env.LOCATION,
-          manifestPattern: 'k8s/manifest.yaml',
+          manifestPattern: 'k8s/manifest.yml',
           namespace: env.NAMESPACE,
           credentialsId: env.CREDENTIALS_ID2,
           verifyDeployments: true,
