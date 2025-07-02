@@ -18,7 +18,7 @@ pipeline {
         echo "Creating GCP Artifact Repo for ${APP_NAME} app"
         
         // Service Account kimliğiyle gcloud'a login ol
-        withCredentials([file(credentialsId: "${CREDENTIALS_ID}", variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+        withCredentials([file(credentialsId: "${CREDENTIALS_ID2}", variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
           sh '''
             gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
             gcloud config set project ${PROJECT_ID}
@@ -56,7 +56,7 @@ pipeline {
     stage('Install Ingress Controller') {
         steps {
             echo "Install Ingress Controller in Kubernetes Cluster on GKE"
-            withCredentials([file(credentialsId: "${CREDENTIALS_ID}", variable: 'KUBECONFIG_FILE')]) {
+            withCredentials([file(credentialsId: "${CREDENTIALS_ID2}", variable: 'KUBECONFIG_FILE')]) {
             sh '''
                 gcloud auth activate-service-account --key-file=$KUBECONFIG_FILE
                 gcloud container clusters get-credentials $CLUSTER_NAME --region ${LOCATION} --project $PROJECT_ID
